@@ -21,10 +21,10 @@ numbers and yields, you have drifted back into Lab 1.
 
 Pick the track that matches your machine. **Everything after this section is identical for everyone.**
 
-| You are on | Track |
-|---|---|
-| macOS / Linux | **A** — install Foundry locally |
-| Windows | **B** — Codespaces, nothing installed on your machine |
+| You are on    | Track                                                 |
+| ------------- | ----------------------------------------------------- |
+| macOS / Linux | **A** — install Foundry locally                       |
+| Windows       | **B** — Codespaces, nothing installed on your machine |
 
 > `lib/` (`forge-std`, `openzeppelin-contracts`) **ships inside this repository**.
 > Neither track needs `git clone --recursive`, and neither needs `make setup` —
@@ -122,15 +122,15 @@ Deployment prints the admin plus seven contracts. Export the ones you need (`$US
 
 The bridge has four planks. Each one is a contract or a role in this repo.
 
-| File | Role | Plank |
-|---|---|---|
-| `src/MockUSDC.sol` | **Cash.** 6 decimals, with a test faucet. The thing that flows across the bridge | — |
-| `src/ComplianceRegistry.sol` | **The guest list.** `setWhitelisted()` / `isWhitelisted()`, gated by `COMPLIANCE_ROLE` | (d) admission |
-| `src/TBillToken.sol` | **The claim.** ERC-20, **18 decimals**, mint/burn gated, and every balance change must pass both endpoints' whitelist | (d) admission |
-| `src/TBillVault.sol` | **The on-ramp and the books.** `subscribe()` prices shares at the attested NAV; `attest()` is the reporter's only way to move it | (b) attestation |
-| `src/exercises/MockTBillCustodian.sol` | **The custodian / SPV.** Answers exactly one question: `realHoldings()` — how much is actually there? | (a) custody |
-| `src/exercises/MockPriceFeed.sol` | **The NAV oracle.** 8 decimals; `1.00e8` is par | (b) attestation |
-| `src/exercises/RedemptionQueue.sol` | **T+1.** Shares in, a queue ticket out, cash later — **your TODOs, Ex5** | (c) redemption |
+| File                                   | Role                                                                                                                             | Plank           |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `src/MockUSDC.sol`                     | **Cash.** 6 decimals, with a test faucet. The thing that flows across the bridge                                                 | —               |
+| `src/ComplianceRegistry.sol`           | **The guest list.** `setWhitelisted()` / `isWhitelisted()`, gated by `COMPLIANCE_ROLE`                                           | (d) admission   |
+| `src/TBillToken.sol`                   | **The claim.** ERC-20, **18 decimals**, mint/burn gated, and every balance change must pass both endpoints' whitelist            | (d) admission   |
+| `src/TBillVault.sol`                   | **The on-ramp and the books.** `subscribe()` prices shares at the attested NAV; `attest()` is the reporter's only way to move it | (b) attestation |
+| `src/exercises/MockTBillCustodian.sol` | **The custodian / SPV.** Answers exactly one question: `realHoldings()` — how much is actually there?                            | (a) custody     |
+| `src/exercises/MockPriceFeed.sol`      | **The NAV oracle.** 8 decimals; `1.00e8` is par                                                                                  | (b) attestation |
+| `src/exercises/RedemptionQueue.sol`    | **T+1.** Shares in, a queue ticket out, cash later — **your TODOs, Ex5**                                                         | (c) redemption  |
 
 ### The two invariants you will defend (Ex6)
 
@@ -142,7 +142,7 @@ settlement solvency   usdc.balanceOf(queue) >= queue.totalClaimable()
 The first says the queue never loses a share and never invents one. The second says it never owes
 settled cash it does not hold. Neither is something the chain can verify against the off-chain
 asset — that is the point. The three decimal scales (18 + 8 − 6) are in `EXERCISES.md` Ex5; the
-third relation that *looks* like an invariant and is not is Ex6.
+third relation that _looks_ like an invariant and is not is Ex6.
 
 `script/Deploy.s.sol` wires the whole system together, and the wiring at the bottom **is** part of
 the lesson: the vault needs `MINTER_ROLE`; the queue needs `MINTER_ROLE` **and** must be
@@ -222,3 +222,29 @@ What the zip must contain:
 
 The discussion prompts live in `STUDENT-QUESTIONS.md` — one per plank, no standard answers, and the
 real point of this lab.
+
+## Architecture diagram
+
+The four planks connect on-chain claims to off-chain assets. Green arrows show
+USDC flows, purple arrows show tBILL flows, and grey dashed arrows show calls or
+trust relationships. MockUSDC represents cash; TBillToken represents fund shares.
+
+![RWA contracts, custody, NAV attestation, and subscription/redemption flows](architecture.png)
+
+## Deployment (Sepolia)
+
+| Contract           | Address & link                                                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| MockUSDC           | [0xC74d7C275648D458F109cDf85bBdD3300b1570D9](https://sepolia.etherscan.io/address/0xC74d7C275648D458F109cDf85bBdD3300b1570D9#code) |
+| ComplianceRegistry | [0x01F4c38147a50834089ABB7734745245d22010f2](https://sepolia.etherscan.io/address/0x01F4c38147a50834089ABB7734745245d22010f2#code) |
+| MockPriceFeed      | [0x3EbbAd80D5903b99F6B3Ccc7bfBE3caCcaDB0dB0](https://sepolia.etherscan.io/address/0x3EbbAd80D5903b99F6B3Ccc7bfBE3caCcaDB0dB0#code) |
+| TBillToken         | [0x38e8560b1D4dFcD36EC16d82b06c17064BcaE595](https://sepolia.etherscan.io/address/0x38e8560b1D4dFcD36EC16d82b06c17064BcaE595#code) |
+| MockTBillCustodian | [0xF98a3a8F5dC8B7f8BF0d29031E7B84df01E99fFb](https://sepolia.etherscan.io/address/0xF98a3a8F5dC8B7f8BF0d29031E7B84df01E99fFb#code) |
+| TBillVault         | [0xfACe618EF94bD9589bfD131Fe1Dfa49cb2bAaAcC](https://sepolia.etherscan.io/address/0xfACe618EF94bD9589bfD131Fe1Dfa49cb2bAaAcC#code) |
+| RedemptionQueue    | [0xbc32bD113C813CF42577a4ceD85a42157620A2A1](https://sepolia.etherscan.io/address/0xbc32bD113C813CF42577a4ceD85a42157620A2A1#code) |
+
+## [github link](https://github.com/Qiancheng-Hao/COMP7810-assign3-code)
+
+## make exercise
+
+![make exercise](make%20exercise.png)
